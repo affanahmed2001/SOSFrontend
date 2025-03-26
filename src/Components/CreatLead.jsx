@@ -1,0 +1,111 @@
+import React, { useEffect, useState } from 'react'
+import Navbar from './Navbar'
+import './CreateLead.css'
+
+const Creat_lead = () => {
+ 
+  const [load, setLoad] = useState(true);
+  const [formData, setFormData] = useState({
+    lead_id:"",
+    names: "",
+    email: "",
+    phone: "",
+    designation: "",
+    file:null,
+    city:"",
+    FBID:"",
+    createdDate:"",
+  });
+
+  // const [message,setMessage]=useState("");
+
+  const handleChane = (e) => {
+    const { name, value } = e.target;
+    setFormData((prevData) => ({
+      ...prevData,
+      [name]: value,
+    }));
+  };
+
+  const handleFileChange=(e)=>{
+    setFormData((prevData)=>({
+        ...prevData,
+        file: e.target.files[0],
+    }));
+  };
+
+  const handleSubmit = async (e) => {
+    const api = `http://localhost:3000/data/create`;
+    e.preventDefault();
+    try {
+      const data = new FormData();
+      data.append("lead_id", formData.lead_id);
+      data.append("names", formData.names);
+      data.append("email", formData.email);
+      data.append("phone", formData.phone);
+      data.append("designation", formData.designation);
+      data.append("cv", formData.file);
+      data.append("city", formData.city);
+      data.append("FBID", formData.FBID);
+      data.append("createdDate", formData.createdDate);
+
+      const response  =await fetch(api,
+        {
+          method:'POST',
+          
+          body:data,
+        });
+        if(!response.ok){
+          throw new error("Failed to fetch api");
+        }
+        const result = await response.json();
+        // setMessage(result.message);
+        setFormData({lead_id:"",names:"",email:"",phone:"",designation:"",cv:"",city:"",FBID:"",createdDate:"",});
+
+        document.querySelector('input[type="file"]').value = "";
+
+      
+    } catch (error) {
+      console.log("Error",error);
+      // setMessage("Error in saving data")
+    }
+
+  };
+
+  useEffect(()=>{
+    const timer = setTimeout(() => {
+      setLoad(false);
+    }, 1000);
+    return ()=> clearTimeout(timer);
+  },[]);
+
+
+  return (
+    <>
+      <Navbar />
+      <div className='home'>
+        <div className="form-container">
+          <h2>Create Lead</h2>
+          <form onSubmit={handleSubmit}>
+            <input type="number" name="lead_id" value={formData.lead_id} onChange={handleChane} placeholder="lead_id"  />
+            <input type="text" name="names" value={formData.names} onChange={handleChane} placeholder="Full Name" />
+            <input type="email" name="email" value={formData.email} onChange={handleChane} placeholder="Email Address" />
+            <input type="number" name="phone" value={formData.phone} onChange={handleChane} placeholder="Phone Number" />
+            <input type="text" name="designation" value={formData.designation} onChange={handleChane} placeholder="Designation" />
+            <input type="file" name="file" onChange={handleFileChange} accept="application/pdf" required />
+            <input type="text" name="city" value={formData.city} onChange={handleChane} placeholder="City" />
+            <input type="text" name="FBID" value={formData.FBID} onChange={handleChane} placeholder="FBID" />
+            <input type="date" name="createdDate" value={formData.createdDate} onChange={handleChane} placeholder="CreatedDate" />
+
+            <button type="submit">Create</button>
+          </form>
+          {/* <p>{message}</p> */}
+        </div>
+      </div>
+    </>
+  )
+}
+
+export default Creat_lead
+
+
