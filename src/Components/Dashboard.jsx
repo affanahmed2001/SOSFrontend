@@ -1,36 +1,103 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Navbar from "./Navbar";
 import "./Dashboard.css";
-import { useEffect } from "react";
 
 const Dashboard = () => {
-
+  const [isImportOpen, setIsImportOpen] = useState(false);
+  const [isExportOpen, setIsExportOpen] = useState(false);
+  const [start_date,setStart_date]=useState("");
+  const [end_date,setEnd_date]=useState("");
+  const [selectedFile, setSelectedFile] = useState(null);
   const [data, setData] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
-  const totalPages = Math.ceil(data.length / itemsPerPage);
+  const toggleImport = () => setIsImportOpen(!isImportOpen);
+  const toggleExport = () => setIsExportOpen(!isExportOpen);
 
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = data.slice(indexOfFirstItem, indexOfLastItem);
+  const closeModals = () => {
+    setIsImportOpen(false);
+    setIsExportOpen(false);
+  };
+
+  const handleStartDate =(e)=>{
+    setStart_date(e.target.value);
+  }
+  
+  const handleEndDate =(e)=>{
+    setEnd_date(e.target.value);
+  }
+
+  const applyFilter = ()=>{
+    const api=`http://localhost:3000/data/export?start_date=${start_date}&end_date=${end_date}`
+    fetch(api)
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error("Failed to fetch filtered data");
+      }
+      return response.json();
+    })
+    .then((data) => setData(data.result))
+    .catch((error) => console.error("Error fetching data:", error));
+
+  }
+
+  const handleFile = (e) => {
+    setSelectedFile(e.target.files[0]);
+  };
+
+  const handleUpload = async () => {
+    if (!selectedFile) {
+      alert("Please select a file.");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("file", selectedFile);
+
+    try {
+      const response = await fetch("http://localhost:3000/data/csvupload", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error("File upload failed.");
+      }
+
+      const result = await response.json();
+      console.log("Success:", result);
+      alert("File uploaded successfully");
+
+      
+      getLeadData();
+    } catch (error) {
+      console.error("Error uploading file:", error);
+      alert("Error uploading file.");
+    }
+  };
+
+  const getLeadData = async () => {
+    try {
+      const response = await fetch("http://localhost:3000/data/get");
+      if (!response.ok) {
+        throw new Error("Failed to fetch data");
+      }
+      const data = await response.json();
+      setData(data.result);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  };
 
   useEffect(() => {
-    const api = `http://localhost:3000/data/get`;
-    fetch(api)
-      .then(response => {
-        if (!response.ok) {
-          throw new error("Filed to fetch data");
-        }
-        return response.json();
-      })
-      .then(data => {
-        // console.log(data)
-        setData(data.result);
-      });
+    getLeadData();
   }, []);
 
 
+
+  const totalPages = Math.ceil(data.length / itemsPerPage);
+  const currentItems = data.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
   return (
     <>
@@ -38,40 +105,37 @@ const Dashboard = () => {
       <div className="home">
         <div className="head">
           <h2 className="push">Dashboard</h2>
-          <button className="import-btn">Import</button>
-          <button className="export-btn">Export</button>
-        </div>
 
-        <div className="filter">
-          <div className="first">
-            <label>Start Date</label>
-            <input type="date" name="startdate" />
-          </div>
-          <div className="first">
-            <label>End Date</label>
-            <input type="date" name="enddate" />
-          </div>
-          <div className="first">
-            <label>Designation</label>
-            <select name="designation">
-              {["a", "b", "c", "d", "e", "f", "g", "h", "i", "j"].map((item) => (
-                <option key={item} value={item}>
-                  {item.toUpperCase()}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className="first">
-            <label>Resume Uploaded</label>
-            <select name="resume">
-              <option value="yes">Yes</option>
-              <option value="no">No</option>
-            </select>
-          </div>
-        </div>
+          <button className="import-btn" onClick={toggleImport}>Import</button>
+          {isImportOpen && (
+            <div className="modal import">
+              <i className="fa-solid fa-xmark close-icon" onClick={closeModals}></i>
+              <div className="importMain">
+                <input type="file" name="fileUpload" onChange={handleFile} />
+                <button onClick={handleUpload}>Upload</button>
+              </div>
+            </div>
+          )}
 
-        <div className="filter">
-          <button className="filter-btn">Filter</button>
+          <button className="export-btn" onClick={toggleExport}>Export</button>
+          {isExportOpen && (
+            <div className="modal export-filter">
+              <i className="fa-solid fa-xmark close-icon" onClick={closeModals}></i>
+              <div className="filter">
+                <div className="first">
+                  <label>Start Date</label>
+                  <input type="date" name="start_date" value={ start_date } onChange={ handleStartDate } />                  
+                </div>
+                <div className="first">
+                  <label>End Date</label>
+                  <input type="date" name="end_date" value={ end_date } onChange={ handleEndDate }/>
+                </div>               
+              </div>
+              <div className="filter-btn">
+                <button className="filter-btn" onClick={ applyFilter }>Filter</button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
@@ -79,19 +143,19 @@ const Dashboard = () => {
         <table className="styled-table">
           <thead>
             <tr>
-              <th>Lead_id</th>
-              <th>name</th>
-              <th>email</th>
-              <th>phone</th>
-              <th>designation</th>
+              <th>Lead ID</th>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Phone</th>
+              <th>Designation</th>
               <th>City</th>
               <th>FBID</th>
-              <th>CreatedDate</th>
-              <th>cv</th>
+              <th>Created Date</th>
+              <th>CV</th>
             </tr>
           </thead>
           <tbody>
-            {Array.isArray(currentItems) && currentItems.length > 0 ? (
+            {currentItems.length > 0 ? (
               currentItems.map((item, index) => (
                 <tr key={index}>
                   <td>{item.lead_id}</td>
@@ -100,49 +164,32 @@ const Dashboard = () => {
                   <td>{item.phone}</td>
                   <td>{item.designation}</td>
                   <td>{item.city}</td>
-                  <td>{item.FBID}</td>
-                  <td>{item.createdDate}</td>
-                  <button> <a
-                    href={`http://localhost:3000/${item.file_path}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    View CV
-                  </a></button>
+                  <td>{item.fbid}</td>
+                  <td>{item.created_date}</td>
+                  <td>
+                    <a href={`http://localhost:3000/${item.file_path}`} target="_blank" rel="noopener noreferrer" className="cv-link">
+                      View CV
+                    </a>
+                  </td>
                 </tr>
               ))
             ) : (
               <tr>
-                <td colSpan="5">No data available</td>
+                <td colSpan="9">No data available</td>
               </tr>
             )}
           </tbody>
         </table>
-        <div style={{ marginTop: "10px" }}>
-          <button
-            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-            disabled={currentPage === 1}
-          >
+        <div className="pagination">
+          <button onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))} disabled={currentPage === 1}>
             Prev
           </button>
-
           {Array.from({ length: totalPages }, (_, i) => (
-            <button
-              key={i}
-              onClick={() => setCurrentPage(i + 1)}
-              style={{
-                margin: "0 5px",
-                fontWeight: currentPage === i + 1 ? "bold" : "normal",
-              }}
-            >
+            <button key={i} onClick={() => setCurrentPage(i + 1)} className={currentPage === i + 1 ? "active-page" : ""}>
               {i + 1}
             </button>
           ))}
-
-          <button
-            onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-            disabled={currentPage === totalPages}
-          >
+          <button onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))} disabled={currentPage === totalPages}>
             Next
           </button>
         </div>
