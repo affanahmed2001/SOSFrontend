@@ -6,7 +6,6 @@ const Creat_lead = () => {
  
   const [load, setLoad] = useState(true);
   const [formData, setFormData] = useState({
-    lead_id:"",
     names: "",
     email: "",
     phone: "",
@@ -39,7 +38,6 @@ const Creat_lead = () => {
     e.preventDefault();
     try {
       const data = new FormData();
-      data.append("lead_id", formData.lead_id);
       data.append("names", formData.names);
       data.append("email", formData.email);
       data.append("phone", formData.phone);
@@ -60,7 +58,7 @@ const Creat_lead = () => {
         }
         const result = await response.json();
         // setMessage(result.message);
-        setFormData({lead_id:"",names:"",email:"",phone:"",designation:"",cv:"",city:"",FBID:"",createdDate:"",});
+        setFormData({names:"",email:"",phone:"",designation:"",cv:"",city:"",FBID:"",createdDate:"",});
 
         document.querySelector('input[type="file"]').value = "";
 
@@ -87,7 +85,6 @@ const Creat_lead = () => {
         <div className="form-container">
           <h2>Create Lead</h2>
           <form onSubmit={handleSubmit}>
-            <input type="number" name="lead_id" value={formData.lead_id} onChange={handleChane} placeholder="lead_id"  />
             <input type="text" name="names" value={formData.names} onChange={handleChane} placeholder="Full Name" />
             <input type="email" name="email" value={formData.email} onChange={handleChane} placeholder="Email Address" />
             <input type="number" name="phone" value={formData.phone} onChange={handleChane} placeholder="Phone Number" />

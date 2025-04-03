@@ -39,7 +39,7 @@ button:hover {
 /* Modal Styles */
 .modal {
   position: fixed;
-  top: 50%;
+  top: 35%;
   left: 50%;
   transform: translate(-50%, -50%);
   background: white;
@@ -122,4 +122,10 @@ button:hover {
 .active-page {
   font-weight: bold;
   background: #ff4b2b;
+}
+
+/* Move table down when modal is open */
+.table-move-down {
+  margin-top: 150px; 
+  transition: margin-top 0.1s ease-in-out;
 }
