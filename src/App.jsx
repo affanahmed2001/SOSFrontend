@@ -12,9 +12,9 @@ function App() {
     
         <Router>
           <Routes>
-            <Route path="/" element={<Dashboard /> } />
+            <Route path="/" element={<Login /> } />
+            <Route path="/dashboard" element={<Dashboard />} /> 
             <Route path="/create" element={<CreateLead />} />
-            <Route path="/login" element={<Login />} /> 
             <Route path="/update/:lead_id" element={<Update_lead />} />
           </Routes>
         </Router>

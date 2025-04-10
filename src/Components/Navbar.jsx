@@ -1,9 +1,11 @@
 import React, { useState } from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import "./Navbar.css";
 
 const Navbar = () => {
   const [open, setOpen] = useState(false);
+  const navigate = useNavigate()
+
 
   const handleOpen = () => {
     setOpen(!open);
@@ -12,6 +14,29 @@ const Navbar = () => {
   const closeSide = () => {
     setOpen(false);
   };
+
+  const handleLogout = async () => {
+    try {
+      const response = await fetch("http://localhost:3000/data/logout", {
+        method: "POST",
+        credentials: "include" // ✅ important if using sessions
+      });
+  
+      const data = await response.json();
+  
+      if (data.success) {
+        navigate('/'); // ✅ redirect to login/home
+      } else {
+        alert(data.message || "Logout failed");
+      }
+  
+      return data;
+    } catch (error) {
+      console.error("Logout Error:", error);
+      return { success: false, message: "Logout failed" };
+    }
+  };
+  
 
   return (
     <>
@@ -27,7 +52,7 @@ const Navbar = () => {
           </div>
           <ul>
             <li>
-              <NavLink to={"/"} activeClassName="active-link">
+              <NavLink to={"/dashboard"} activeClassName="active-link">
                 Dashboard
               </NavLink>
             </li>
@@ -37,8 +62,8 @@ const Navbar = () => {
               </NavLink>
             </li>
             <li>
-              <NavLink to={"/login"} activeClassName="active-link">
-                Login
+              <NavLink activeClassName="active-link" onClick={handleLogout}>
+                LogOut 
               </NavLink>
             </li>
           </ul>

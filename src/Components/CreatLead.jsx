@@ -59,6 +59,7 @@ const Creat_lead = () => {
         const result = await response.json();
         // setMessage(result.message);
         setFormData({names:"",email:"",phone:"",designation:"",cv:"",city:"",FBID:"",createdDate:"",});
+        alert("data Created Successfully!");
 
         document.querySelector('input[type="file"]').value = "";
 
@@ -81,7 +82,7 @@ const Creat_lead = () => {
   return (
     <>
       <Navbar />
-      <div className='home'>
+      <div className='createLeadHome'>
         <div className="form-container">
           <h2>Create Lead</h2>
           <form onSubmit={handleSubmit}>

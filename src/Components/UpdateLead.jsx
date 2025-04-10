@@ -118,7 +118,7 @@ const update_lead = () => {
   return (
     <>
       <Navbar />
-      <div className='home'>
+      <div className='createLeadHome'>
         <div className="form-container">
           <h2>Update Lead</h2>
           <form onSubmit={handleSubmit}>

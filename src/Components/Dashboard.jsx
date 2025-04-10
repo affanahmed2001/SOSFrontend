@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
 import Navbar from "./Navbar";
 import "./Dashboard.css";
-import Update_lead from "./UpdateLead";
 
 const Dashboard = () => {
   const [isImportOpen, setIsImportOpen] = useState(false);
@@ -17,12 +15,6 @@ const Dashboard = () => {
 
   const toggleImport = () => setIsImportOpen(!isImportOpen);
   const toggleExport = () => setIsExportOpen(!isExportOpen);
-
-  // <Router>
-  //   <Routes>
-  //     <Route path="/update" element={<Update_lead />} />
-  //   </Routes>
-  // </Router>
 
   const closeModals = () => {
     setIsImportOpen(false);
@@ -111,7 +103,7 @@ const Dashboard = () => {
   return (
     <>
       <Navbar />
-      <div className="home">
+      <div className="dashboardHome">
 
         <div className="head">
           <h2 className="push">Dashboard</h2>
@@ -122,7 +114,7 @@ const Dashboard = () => {
               <i className="fa-solid fa-xmark close-icon" onClick={closeModals}></i>
               <div className="importMain">
                 <input type="file" name="fileUpload" onChange={handleFile} />
-                <button onClick={handleUpload}>Upload</button>
+                <button onClick={()=>{handleUpload(); closeModals();}}>Upload</button>
               </div>
             </div>
           )}
@@ -142,7 +134,7 @@ const Dashboard = () => {
                 </div>
               </div>
               <div className="filter-btn">
-                <button className="filter-btn" onClick={applyFilter}>Filter</button>
+                <button className="filter-btn" onClick={()=>{ applyFilter(); closeModals(); }}>Filter</button>
               </div>
             </div>
           )}
