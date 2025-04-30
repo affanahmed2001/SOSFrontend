@@ -15,28 +15,40 @@ const Navbar = () => {
     setOpen(false);
   };
 
-  const handleLogout = async () => {
-    try {
-      const response = await fetch("http://localhost:3000/data/logout", {
-        method: "POST",
-        credentials: "include" // ✅ important if using sessions
-      });
+  // const handleLogout = async () => {
+  //   try {
+  //     const response = await fetch("http://localhost:3000/data/logout", {
+  //       method: "POST",
+  //       credentials: "include"
+  //     });
   
-      const data = await response.json();
+  //     const data = await response.json();
+
+  //     localStorage.removeItem("token");
   
-      if (data.success) {
-        navigate('/'); // ✅ redirect to login/home
-      } else {
-        alert(data.message || "Logout failed");
-      }
+  //     if (data.success) {
+  //       navigate('/Lo'); 
+  //     } else {
+  //       alert(data.message || "Logout failed");
+  //     }
   
-      return data;
-    } catch (error) {
-      console.error("Logout Error:", error);
-      return { success: false, message: "Logout failed" };
-    }
-  };
+  //     return data;
+  //   } catch (error) {
+  //     console.error("Logout Error:", error);
+  //     return { success: false, message: "Logout failed" };
+  //   }
+  // };
   
+  const handleLogout=async () =>{
+    await fetch("http://localhost:3000/data/logout", {
+      method: "POST",
+    });
+  
+    localStorage.removeItem("token"); 
+    navigate("/");
+  }
+ 
+
 
   return (
     <>

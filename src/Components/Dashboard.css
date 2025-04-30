@@ -95,7 +95,8 @@ button:hover {
   transition: 0.3s ease-in-out;
 }
 
-.cv-link {
+.cv-link,
+span {
   color: #ff4b2b;
   font-weight: bold;
 }

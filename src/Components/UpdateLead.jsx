@@ -7,8 +7,8 @@ import { useParams } from 'react-router-dom';
 const update_lead = () => {
 
   const { lead_id } = useParams();
-  console.log('LeadID =>',lead_id);
-  
+  console.log('LeadID =>', lead_id);
+
   const [load, setLoad] = useState(true);
   const [formData, setFormData] = useState({
     name: "",
@@ -19,6 +19,8 @@ const update_lead = () => {
     city: "",
     fbid: "",
     created_date: "",
+    existingFilePath: "",
+    file_path: "",  
   });
 
   useEffect(() => {
@@ -26,23 +28,30 @@ const update_lead = () => {
 
     const fetchLeadData = async () => {
       try {
-        const response = await fetch(`http://localhost:3000/data/data/${lead_id}`);
+        const token=localStorage.getItem('token')
+        const response = await fetch(`http://localhost:3000/data/data/${lead_id}`,{
+          method:"GET",
+          headers:{
+            "Authorization":`Bearer ${token}`
+          },
+        });
         const data = await response.json();
 
         console.log('Fetching data =>', data);
 
-        
-          setFormData({
-            name: data.name || "",
-            email: data.email || "",
-            phone: data.phone || "",
-            designation: data.designation || "",
-            city: data.city || "",
-            fbid: data.fbid || "",
-            created_date: data.created_date ? data.created_date.split("T")[0] : "", // Format Date
-            file: null
-          });
-          setLoad(false);
+        setFormData({
+          name: data.name || "",
+          email: data.email || "",
+          phone: data.phone || "",
+          designation: data.designation || "",
+          city: data.city || "",
+          fbid: data.fbid || "",
+          created_date: data.created_date ? data.created_date.split("T")[0] : "",
+          file: null,
+          existingFilePath: data.file_path,
+          file_path: data.file_path || "",
+        });
+        setLoad(false);
       } catch (error) {
         console.error("Error fetching lead data:", error);
       }
@@ -72,6 +81,8 @@ const update_lead = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const api = `http://localhost:3000/data/update/${lead_id}`;
+    const token = localStorage.getItem('token');
+
     try {
       const data = new FormData();
       data.append("lead_id", lead_id);
@@ -81,6 +92,11 @@ const update_lead = () => {
       data.append("designation", formData.designation);
       if (formData.file) {
         data.append("cv", formData.file);
+      }else if (formData.file_path) {
+        const fileResponse = await fetch(`http://localhost:3000/${formData.file_path}`);
+        const fileBlob = await fileResponse.blob();
+        const fileName = formData.file_path.split('/').pop(); // Get the filename
+        data.append("cv", fileBlob, fileName);
       }
       data.append("city", formData.city);
       data.append("fbid", formData.fbid);
@@ -90,6 +106,9 @@ const update_lead = () => {
         {
           method: "PUT",
           body: data,
+          headers: {
+            "Authorization": `Bearer ${token}`, 
+          },
         });
       if (!response.ok) {
         throw new Error("Failed to fetch api");
@@ -102,10 +121,10 @@ const update_lead = () => {
       document.querySelector('input[type="file"]').value = "";
     } catch (error) {
       console.log("Error", error);
-      alert("Error in saving data")
+      alert("Error in saving data");
     }
 
-  };
+  }
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -126,13 +145,21 @@ const update_lead = () => {
             <input type="email" name="email" value={formData.email} onChange={handleChange} placeholder="Email Address" />
             <input type="number" name="phone" value={formData.phone} onChange={handleChange} placeholder="Phone Number" />
             <input type="text" name="designation" value={formData.designation} onChange={handleChange} placeholder="Designation" />
-            <input type="file" name="file" onChange={handleFileChange} accept="application/pdf" />
             <input type="text" name="city" value={formData.city} onChange={handleChange} placeholder="City" />
             <input type="text" name="fbid" value={formData.fbid} onChange={handleChange} placeholder="fbid" />
             <input type="date" name="created_date" value={formData.created_date} onChange={handleChange} placeholder="Created Date" />
-
+            <span className='file'><input type="file" className='chooseFile' name="file" onChange={handleFileChange} accept="application/pdf" />
+            {formData.existingFilePath ?
+              (<a
+                href={`http://localhost:3000/${formData.existingFilePath}`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                View CV
+              </a>) : (<span>Upload CV</span>)
+            }</span>
             <button type="submit">Update</button>
-          </form>
+          </form> 
         </div>
       </div>
     </>

@@ -1,9 +1,13 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from 'react-router-dom';
+
+
 
 import Navbar from "./Navbar";
 import "./Dashboard.css";
 
 const Dashboard = () => {
+  const navigate = useNavigate();
   const [isImportOpen, setIsImportOpen] = useState(false);
   const [isExportOpen, setIsExportOpen] = useState(false);
   const [start_date, setStart_date] = useState("");
@@ -26,17 +30,32 @@ const Dashboard = () => {
   }
 
   const handleEndDate = (e) => {
+
     setEnd_date(e.target.value);
   }
 
   const applyFilter = () => {
+    const token = localStorage.getItem('token')
+
+    if (!start_date || !end_date) {
+      alert("Please select start and end dates");
+      return;
+    }
     const api = `http://localhost:3000/data/export?start_date=${start_date}&end_date=${end_date}`
-    fetch(api)
+    fetch(api,{
+      method: "GET",
+      headers:{
+        Authorization:`Bearer ${token}`
+      },
+    })
       .then((response) => {
         if (!response.ok) {
           throw new Error("Failed to fetch filtered data");
         }
+
+        alert("File Export Successfully");
         return response.json();
+
       })
       .then((data) => setData(data.result))
       .catch((error) => console.error("Error fetching data:", error));
@@ -59,17 +78,23 @@ const Dashboard = () => {
     try {
       const response = await fetch("http://localhost:3000/data/csvupload", {
         method: "POST",
+        headers:{
+          Authorization:`Bearer {token}`
+        },
         body: formData,
       });
+
 
       if (!response.ok) {
         throw new Error("File upload failed.");
       }
 
       const result = await response.json();
-      console.log("Success:", result);
-      alert("File uploaded successfully");
 
+      if (result.httpStatusCode == 403) {
+        window.location.href = "/login";  
+      }
+      alert(result.message);
 
       getLeadData();
     } catch (error) {
@@ -80,11 +105,26 @@ const Dashboard = () => {
 
   const getLeadData = async () => {
     try {
-      const response = await fetch("http://localhost:3000/data/get");
-      if (!response.ok) {
-        throw new Error("Failed to fetch data");
+      const token = localStorage.getItem("token");
+      if (!token) {
+        console.error("No token found in localStorage");
+        return;
       }
+
+      const response = await fetch("http://localhost:3000/data/get", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
       const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch data", error.message);
+      }
+
       setData(data.result);
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -92,7 +132,16 @@ const Dashboard = () => {
   };
 
   useEffect(() => {
-    getLeadData();
+    const token = localStorage.getItem("token");
+    console.log("Token from localStorage:", token);
+
+    if (token) {
+      getLeadData();
+    }
+    else {
+      alert("Session Expired, please relogin")
+      navigate("/");
+    }
   }, []);
 
 
@@ -114,7 +163,7 @@ const Dashboard = () => {
               <i className="fa-solid fa-xmark close-icon" onClick={closeModals}></i>
               <div className="importMain">
                 <input type="file" name="fileUpload" onChange={handleFile} />
-                <button onClick={()=>{handleUpload(); closeModals();}}>Upload</button>
+                <button onClick={() => { handleUpload(); closeModals(); }}>Upload</button>
               </div>
             </div>
           )}
@@ -134,7 +183,7 @@ const Dashboard = () => {
                 </div>
               </div>
               <div className="filter-btn">
-                <button className="filter-btn" onClick={()=>{ applyFilter(); closeModals(); }}>Filter</button>
+                <button className="filter-btn" onClick={() => { applyFilter(); closeModals(); }}>Filter</button>
               </div>
             </div>
           )}
@@ -159,7 +208,7 @@ const Dashboard = () => {
             <tbody>
               {currentItems.length > 0 ? (
                 currentItems.map((item, index) => (
-                  console.log(item.lead_id,"lead id"),
+                  console.log(item.lead_id, "lead id"),
                   <tr key={index}>
                     <td>{item.lead_id}</td>
                     <td>{item.name}</td>
@@ -170,12 +219,14 @@ const Dashboard = () => {
                     <td>{item.fbid}</td>
                     <td>{item.created_date}</td>
                     <td>
-                      <a href={`http://localhost:3000/${item.file_path}`} target="_blank" rel="noopener noreferrer" className="cv-link">
-                        View CV
-                      </a>
+                      {item.file_path ? (
+                        <a href={`http://localhost:3000/${item.file_path}`} target="_blank" rel="noopener noreferrer" className="cv-link">
+                          View CV
+                        </a>) : (
+                        <span>Upload CV</span>
+                      )}
                     </td>
                     <td><a href={`/update/${item.lead_id}`}>Edit</a></td>
-
                   </tr>
                 ))
               ) : (

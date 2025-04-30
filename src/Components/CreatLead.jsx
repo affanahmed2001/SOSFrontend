@@ -90,11 +90,11 @@ const Creat_lead = () => {
             <input type="email" name="email" value={formData.email} onChange={handleChane} placeholder="Email Address" />
             <input type="number" name="phone" value={formData.phone} onChange={handleChane} placeholder="Phone Number" />
             <input type="text" name="designation" value={formData.designation} onChange={handleChane} placeholder="Designation" />
-            <input type="file" name="file" onChange={handleFileChange} accept="application/pdf" required />
             <input type="text" name="city" value={formData.city} onChange={handleChane} placeholder="City" />
             <input type="text" name="FBID" value={formData.FBID} onChange={handleChane} placeholder="FBID" />
-            <input type="date" name="createdDate" value={formData.createdDate} onChange={handleChane} placeholder="CreatedDate" />
-
+            {/* <input type="date" name="createdDate" value={formData.createdDate} onChange={handleChane} placeholder="CreatedDate" /> */}
+            <input type="file" name="file" onChange={handleFileChange} accept="application/pdf" required />
+    
             <button type="submit">Create</button>
           </form>
           {/* <p>{message}</p> */}

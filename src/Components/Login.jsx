@@ -29,20 +29,24 @@ const Login = () => {
         headers: {
           "Content-Type": "application/json"
         },
-        credentials: "include", // ⬅️ important!
+        credentials: "include", 
         body: JSON.stringify(loginData)
       });
       
 
       const data = await response.json();
 
-      // Check custom `success` field instead of response.ok
+      
       if (data.success) {
+        const token = data.token; 
+        localStorage.setItem("token", token); 
+      
         alert("Login success");
-        navigate("/dashboard"); // fixed: use `/dashboard` not `./dashboard`
+        navigate("/dashboard");
       } else {
         alert(data.message || "Login Failed");
       }
+      
 
     } catch (error) {
       console.log("Error", error);

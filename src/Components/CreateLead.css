@@ -33,7 +33,6 @@ form {
 input[type="text"],
 input[type="email"],
 input[type="number"],
-input[type="file"],
 input[type="date"] {
   padding: 12px 14px;
   font-size: 15px;
@@ -61,4 +60,24 @@ input:focus {
 
 .createLeadHome button:hover {
   background: #e63e26;
+}
+
+a{
+  color: #ff4b2b;
+  font-weight: bold;
+}
+
+input[type="file"]{
+  padding: 12px 14px;
+  font-size: 15px;
+}
+
+.file{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+    border: 2px solid #ddd;
+    border-radius: 6px;
+    outline: none;
+    transition: border-color 0.3s;
 }
