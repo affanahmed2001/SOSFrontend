@@ -39,14 +39,22 @@ const Navbar = () => {
   //   }
   // };
   
-  const handleLogout=async () =>{
-    await fetch("http://localhost:3000/data/logout", {
+ const handleLogout = async () => {
+  try {
+    const res = await fetch("http://localhost:3000/data/logout", {
       method: "POST",
+      credentials: "include",
     });
-  
-    localStorage.removeItem("token"); 
-    navigate("/");
+
+    if (res.ok) {
+      navigate("/"); 
+    } else {
+      console.error("Logout failed");
+    }
+  } catch (err) {
+    console.error("Network error during logout", err);
   }
+};
  
 
 

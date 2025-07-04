@@ -20,6 +20,7 @@ const Dashboard = () => {
   const toggleImport = () => setIsImportOpen(!isImportOpen);
   const toggleExport = () => setIsExportOpen(!isExportOpen);
 
+  
   const closeModals = () => {
     setIsImportOpen(false);
     setIsExportOpen(false);
@@ -35,32 +36,43 @@ const Dashboard = () => {
   }
 
   const applyFilter = () => {
-    const token = localStorage.getItem('token')
-
+    const token = localStorage.getItem('token');
+  
     if (!start_date || !end_date) {
       alert("Please select start and end dates");
       return;
     }
-    const api = `http://localhost:3000/data/export?start_date=${start_date}&end_date=${end_date}`
-    fetch(api,{
+  
+    const api = `http://localhost:3000/data/export?start_date=${start_date}&end_date=${end_date}`;
+    fetch(api, {
       method: "GET",
-      headers:{
-        Authorization:`Bearer ${token}`
+      headers: {
+        Authorization: `Bearer ${token}`,
       },
     })
       .then((response) => {
         if (!response.ok) {
-          throw new Error("Failed to fetch filtered data");
+          throw new Error("Failed to export file");
         }
-
-        alert("File Export Successfully");
-        return response.json();
-
+  
+        return response.blob(); // handle as blob for download
       })
-      .then((data) => setData(data.result))
-      .catch((error) => console.error("Error fetching data:", error));
-
-  }
+      .then((blob) => {
+        const url = window.URL.createObjectURL(new Blob([blob]));
+        const link = document.createElement('a');
+        link.href = url;
+  
+        // Optional: Use timestamp or filename from headers
+        link.setAttribute('download', `filtered_data_${Date.now()}.csv`);
+  
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        alert("File Exported Successfully");
+      })
+      .catch((error) => console.error("Error exporting file:", error));
+  };
+  
 
   const handleFile = (e) => {
     setSelectedFile(e.target.files[0]);
@@ -76,10 +88,11 @@ const Dashboard = () => {
     formData.append("file", selectedFile);
 
     try {
+    const token = localStorage.getItem('token');
       const response = await fetch("http://localhost:3000/data/csvupload", {
         method: "POST",
         headers:{
-          Authorization:`Bearer {token}`
+          Authorization:`Bearer ${token}`
         },
         body: formData,
       });
@@ -91,8 +104,9 @@ const Dashboard = () => {
 
       const result = await response.json();
 
-      if (result.httpStatusCode == 403) {
-        window.location.href = "/login";  
+      if (result.httpStatusCode === 403) {
+        window.location.href = "/";  
+        return;
       }
       alert(result.message);
 
@@ -133,7 +147,10 @@ const Dashboard = () => {
 
   useEffect(() => {
     const token = localStorage.getItem("token");
-    console.log("Token from localStorage:", token);
+    if(!token){
+      navigate('/')
+    }
+    // console.log("Token from localStorage:", token);
 
     if (token) {
       getLeadData();
@@ -216,8 +233,8 @@ const Dashboard = () => {
                     <td>{item.phone}</td>
                     <td>{item.designation}</td>
                     <td>{item.city}</td>
-                    <td>{item.fbid}</td>
-                    <td>{item.created_date}</td>
+                    <td>{item.FBID}</td>
+                    <td>{item.createdDate}</td>
                     <td>
                       {item.file_path ? (
                         <a href={`http://localhost:3000/${item.file_path}`} target="_blank" rel="noopener noreferrer" className="cv-link">

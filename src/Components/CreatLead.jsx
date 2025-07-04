@@ -34,6 +34,8 @@ const Creat_lead = () => {
   };
 
   const handleSubmit = async (e) => {
+    const token = localStorage.getItem('token');
+    
     const api = `http://localhost:3000/data/create`;
     e.preventDefault();
     try {
@@ -50,7 +52,9 @@ const Creat_lead = () => {
       const response  =await fetch(api,
         {
           method:'POST',
-          
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },          
           body:data,
         });
         if(!response.ok){

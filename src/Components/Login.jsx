@@ -8,8 +8,8 @@ const Login = () => {
   const navigate = useNavigate();
 
   const [loginData, setLoginData] = useState({
-    u_email: "",
-    u_password: "",
+    username: "",
+    password: "",
   });
 
   const handleChange = (e) => {
@@ -19,6 +19,7 @@ const Login = () => {
       [name]: value,
     }));
   }
+  
   const handleSubmit = async (e) => {
     const API = `http://localhost:3000/data/login`;
     e.preventDefault();
@@ -63,16 +64,16 @@ const Login = () => {
           <img src="/image/Logo.png" alt="" className='logo' />
           <input
             type="text"
-            name="u_email"
+            name="username"
             placeholder="Your Email"
-            value={loginData.u_email}
+            value={loginData.username}
             onChange={handleChange}
           />
           <input
             type="password"
-            name="u_password"
+            name="password"
             placeholder="Enter your password"
-            value={loginData.u_password}
+            value={loginData.password}
             onChange={handleChange}
           />
           <button type="submit">Submit</button>
