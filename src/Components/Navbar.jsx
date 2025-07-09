@@ -41,7 +41,8 @@ const Navbar = () => {
   
  const handleLogout = async () => {
   try {
-    const res = await fetch("http://localhost:3000/data/logout", {
+    // const res = await fetch("http://localhost:3000/data/logout", {
+    const res = await fetch("https://sosapi.elloweb.com/data/logout", {
       method: "POST",
       credentials: "include",
     });

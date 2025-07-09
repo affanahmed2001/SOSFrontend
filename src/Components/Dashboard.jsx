@@ -43,7 +43,8 @@ const Dashboard = () => {
       return;
     }
   
-    const api = `http://localhost:3000/data/export?start_date=${start_date}&end_date=${end_date}`;
+    // const api = `http://localhost:3000/data/export?start_date=${start_date}&end_date=${end_date}`;
+    const api = `https://sosapi.elloweb.com/data/export?start_date=${start_date}&end_date=${end_date}`;
     fetch(api, {
       method: "GET",
       headers: {
@@ -89,7 +90,8 @@ const Dashboard = () => {
 
     try {
     const token = localStorage.getItem('token');
-      const response = await fetch("http://localhost:3000/data/csvupload", {
+      // const response = await fetch("http://localhost:3000/data/csvupload", {
+      const response = await fetch("https://sosapi.elloweb.com/data/csvupload", {
         method: "POST",
         headers:{
           Authorization:`Bearer ${token}`
@@ -125,7 +127,8 @@ const Dashboard = () => {
         return;
       }
 
-      const response = await fetch("http://localhost:3000/data/get", {
+      // const response = await fetch("http://localhost:3000/data/get", {
+      const response = await fetch("https://sosapi.elloweb.com/data/get", {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
