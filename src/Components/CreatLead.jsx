@@ -36,7 +36,8 @@ const Creat_lead = () => {
   const handleSubmit = async (e) => {
     const token = localStorage.getItem('token');
     
-    const api = `http://localhost:3000/data/create`;
+    // const api = `http://localhost:3011/data/create`;
+    const api = `https://sosapi.elloweb.com/data/create`;
     e.preventDefault();
     try {
       const data = new FormData();

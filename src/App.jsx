@@ -3,7 +3,8 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Dashboard from './Components/Dashboard'
 import Login from './Components/Login';
 import CreateLead from './Components/CreatLead';
-import Update_lead from './Components/UpdateLead';
+import Updatelead from './Components/UpdateLead';
+import ProtectedRoute from './Components/ProtectedRoute';
 
 function App() {
 
@@ -12,9 +13,9 @@ function App() {
         <Router>
           <Routes>
             <Route path="/" element={<Login /> } />
-            <Route path="/dashboard" element={<Dashboard />} /> 
-            <Route path="/create" element={<CreateLead />} />
-            <Route path="/update/:lead_id" element={<Update_lead />} />
+            <Route path="/dashboard" element={ <ProtectedRoute><Dashboard /></ProtectedRoute>} /> 
+            <Route path="/create" element={ <ProtectedRoute><CreateLead /></ProtectedRoute>} />
+            <Route path="/update/:lead_id" element={<ProtectedRoute><Updatelead /></ProtectedRoute>} />
           </Routes>
         </Router>
     </>

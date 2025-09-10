@@ -21,7 +21,7 @@ const Login = () => {
   }
   
   const handleSubmit = async (e) => {
-    // const API = `http://localhost:3000/data/login`;
+    // const API = `http://localhost:3011/data/login`;
     const API = `https://sosapi.elloweb.com/data/login`;
     e.preventDefault();
 
@@ -56,8 +56,6 @@ const Login = () => {
     }
   };
 
-
-
   return (
     <>
       <div className='loginHome'>
@@ -87,4 +85,3 @@ const Login = () => {
 
 
 export default Login 
-

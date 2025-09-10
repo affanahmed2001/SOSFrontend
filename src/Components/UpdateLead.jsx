@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from 'react'
 import Navbar from './Navbar'
 import './CreateLead.css'
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 
 
 const update_lead = () => {
 
   const { lead_id } = useParams();
   console.log('LeadID =>', lead_id);
+  const navigate = useNavigate();
 
   const [load, setLoad] = useState(true);
   const [formData, setFormData] = useState({
@@ -29,8 +30,10 @@ const update_lead = () => {
     const fetchLeadData = async () => {
       try {
         const token=localStorage.getItem('token')
-        const response = await fetch(`http://localhost:3000/data/data/${lead_id}`,{
+        // const response = await fetch(`http://localhost:3011/data/data/${lead_id}`,{
+        const response = await fetch(`https://sosapi.elloweb.com/data/data/${lead_id}`,{
           method:"GET",
+  // credentials: "include",  
           headers:{
             "Authorization":`Bearer ${token}`
           },
@@ -80,7 +83,8 @@ const update_lead = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const api = `http://localhost:3000/data/update/${lead_id}`;
+    // const api = `http://localhost:3011/data/update/${lead_id}`;
+    const api = `https://sosapi.elloweb.com/data/update/${lead_id}`;
     const token = localStorage.getItem('token');
 
     try {
@@ -93,7 +97,8 @@ const update_lead = () => {
       if (formData.file) {
         data.append("cv", formData.file);
       }else if (formData.file_path) {
-        const fileResponse = await fetch(`http://localhost:3000/${formData.file_path}`);
+        // const fileResponse = await fetch(`http://localhost:3011/${formData.file_path}`);
+        const fileResponse = await fetch(`https://sosapi.elloweb.com/${formData.file_path}`);
         const fileBlob = await fileResponse.blob();
         const fileName = formData.file_path.split('/').pop(); // Get the filename
         data.append("cv", fileBlob, fileName);
@@ -111,7 +116,7 @@ const update_lead = () => {
           },
         });
       if (!response.ok) {
-        throw new Error("Failed to fetch api");
+        throw new Error("Failed to update Lead");
       }
       const result = await response.json();
       alert("Lead updated successfully!");
@@ -151,7 +156,8 @@ const update_lead = () => {
             <span className='file'><input type="file" className='chooseFile' name="file" onChange={handleFileChange} accept="application/pdf" />
             {formData.existingFilePath ?
               (<a
-                href={`http://localhost:3000/${formData.existingFilePath}`}
+                // href={`http://localhost:3011/data/update/${formData.existingFilePath}`}
+                href={`https://sosapi.elloweb.com/${formData.existingFilePath}`}
                 target="_blank"
                 rel="noopener noreferrer"
               >

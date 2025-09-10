@@ -39,23 +39,31 @@ const Navbar = () => {
   //   }
   // };
   
- const handleLogout = async () => {
+const handleLogout = async () => {
   try {
-    // const res = await fetch("http://localhost:3000/data/logout", {
     const res = await fetch("https://sosapi.elloweb.com/data/logout", {
       method: "POST",
-      credentials: "include",
+      credentials: "include", // include cookies
     });
 
-    if (res.ok) {
-      navigate("/"); 
-    } else {
+    if (!res.ok) {
       console.error("Logout failed");
+      return;
     }
+
+    // Clear local storage
+    localStorage.removeItem("token");
+
+    // Optionally clear sessionStorage too
+    sessionStorage.removeItem("token");
+
+    // Redirect
+    navigate("/");
   } catch (err) {
     console.error("Network error during logout", err);
   }
 };
+
  
 
 

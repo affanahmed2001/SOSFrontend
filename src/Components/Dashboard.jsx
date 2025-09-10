@@ -20,7 +20,7 @@ const Dashboard = () => {
   const toggleImport = () => setIsImportOpen(!isImportOpen);
   const toggleExport = () => setIsExportOpen(!isExportOpen);
 
-  
+
   const closeModals = () => {
     setIsImportOpen(false);
     setIsExportOpen(false);
@@ -37,16 +37,17 @@ const Dashboard = () => {
 
   const applyFilter = () => {
     const token = localStorage.getItem('token');
-  
+
     if (!start_date || !end_date) {
       alert("Please select start and end dates");
       return;
     }
-  
-    // const api = `http://localhost:3000/data/export?start_date=${start_date}&end_date=${end_date}`;
+
+    // const api = `http://localhost:3011/data/export?start_date=${start_date}&end_date=${end_date}`;
     const api = `https://sosapi.elloweb.com/data/export?start_date=${start_date}&end_date=${end_date}`;
     fetch(api, {
       method: "GET",
+      credentials: "include",
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -55,17 +56,17 @@ const Dashboard = () => {
         if (!response.ok) {
           throw new Error("Failed to export file");
         }
-  
+
         return response.blob(); // handle as blob for download
       })
       .then((blob) => {
         const url = window.URL.createObjectURL(new Blob([blob]));
         const link = document.createElement('a');
         link.href = url;
-  
+
         // Optional: Use timestamp or filename from headers
         link.setAttribute('download', `filtered_data_${Date.now()}.csv`);
-  
+
         document.body.appendChild(link);
         link.click();
         link.remove();
@@ -73,7 +74,7 @@ const Dashboard = () => {
       })
       .catch((error) => console.error("Error exporting file:", error));
   };
-  
+
 
   const handleFile = (e) => {
     setSelectedFile(e.target.files[0]);
@@ -89,11 +90,12 @@ const Dashboard = () => {
     formData.append("file", selectedFile);
 
     try {
-    const token = localStorage.getItem('token');
-      // const response = await fetch("http://localhost:3000/data/csvupload", {
+      const token = localStorage.getItem('token');
+      // const response = await fetch("http://localhost:3011/data/csvupload", {
       const response = await fetch("https://sosapi.elloweb.com/data/csvupload", {
         method: "POST",
-        headers:{
+        credentials: "include",
+        headers: {
           Authorization:`Bearer ${token}`
         },
         body: formData,
@@ -107,7 +109,7 @@ const Dashboard = () => {
       const result = await response.json();
 
       if (result.httpStatusCode === 403) {
-        window.location.href = "/";  
+        window.location.href = "/";
         return;
       }
       alert(result.message);
@@ -119,50 +121,42 @@ const Dashboard = () => {
     }
   };
 
-  const getLeadData = async () => {
-    try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        console.error("No token found in localStorage");
-        return;
-      }
 
-      // const response = await fetch("http://localhost:3000/data/get", {
-      const response = await fetch("https://sosapi.elloweb.com/data/get", {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error("Failed to fetch data", error.message);
-      }
-
-      setData(data.result);
-    } catch (error) {
-      console.error("Error fetching data:", error);
-    }
-  };
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    if(!token){
-      navigate('/')
-    }
-    // console.log("Token from localStorage:", token);
+    const getLeadData = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        
+        // const response = await fetch("http://localhost:3011/data/get", {   
+        const response = await fetch("https://sosapi.elloweb.com/data/get", {
 
-    if (token) {
-      getLeadData();
-    }
-    else {
-      alert("Session Expired, please relogin")
-      navigate("/");
-    }
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`,   // <— you must send the token
+          }
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          if (response.status === 401) {
+            alert("Session expired, please log in again.");
+            navigate("/");
+            return;
+          }
+          throw new Error(data.message || "Failed to fetch data");
+        }
+
+        setData(data.result); // assuming useState is defined
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+    getLeadData();
   }, []);
+
 
 
 
@@ -240,7 +234,8 @@ const Dashboard = () => {
                     <td>{item.createdDate}</td>
                     <td>
                       {item.file_path ? (
-                        <a href={`http://localhost:3000/${item.file_path}`} target="_blank" rel="noopener noreferrer" className="cv-link">
+                        // <a href={`http://localhost:3011/${item.file_path}`} target="_blank" rel="noopener noreferrer" className="cv-link">
+                        <a href={`https://sosapi.elloweb.com/${item.file_path}`} target="_blank" rel="noopener noreferrer" className="cv-link">
                           View CV
                         </a>) : (
                         <span>Upload CV</span>
